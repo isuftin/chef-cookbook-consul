@@ -1,20 +1,11 @@
 require_relative '../spec_helper'
 
-describe 'cookbook-consul::default' do
-  subject { ChefSpec::Runner.new.converge(described_recipe) }
+describe 'owi-consul::default' do
+  let(:chef_run) { ChefSpec::ServerRunner.converge(described_recipe) }
 
-  # Write quick specs using `it` blocks with implied subjects
-  it { should do_something('...') }
-
-  # Write full examples using the `expect` syntax
-  it 'does something' do
-    expect(subject).to do_something('...')
+  # I expect the default recipe to not include the following recipes
+  it 'Does not include the server recipe' do
+    expect(chef_run).to_not include_recipe('owi-consul::server')
   end
 
-  # Use an explicit subject
-  let(:chef_run) { ChefSpec::Runner.new.converge(described_recipe) }
-
-  it 'does something' do
-    expect(chef_run).to do_something('...')
-  end
 end

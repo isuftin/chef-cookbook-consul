@@ -18,12 +18,28 @@ platforms:
       provider: vmware_fusion
 
 suites:
-  - name: default
+  - name: default-server
+    driver:
+      network:
+      - ["private_network", {ip: "10.0.0.10"}]
     run_list:
-      - recipe[owi-consul::default]
+      - recipe[owi-consul::server]
+    data_path: './test/fixtures/files/'
     attributes: {
+      'consul' : {
+        'config' : {
+          'acl_datacenter' : 'kitchen_server',
+          'datacenter' : 'kitchen_center',
+          'server' : true,
+          'server_name' : 'test_server',
+          'enable_syslog' : true,
+          'ui' : true,
+          'verify_incoming' : true,
+          'verify_outgoing' : true,
+          'ca_file' : '/tmp/kitchen/data/rootCA.pem',
+          'cert_file' : '/tmp/kitchen/data/rootCA.crt',
+          'key_file' : '/tmp/kitchen/data/rootCA.key'
+        }
+      }
     }
-  - name: noauditd
-    run_list:
-      - recipe[stig::default]
     
