@@ -10,3 +10,4 @@ source_url 'https://github.com/USGS-CIDA/chef-cookbook-consul' if respond_to?(:s
 issues_url 'https://github.com/USGS-CIDA/chef-cookbook-consul/issues' if respond_to?(:issues_url)
 
 depends 'consul'
+depends 'iptables', '>= 3.0.0'
