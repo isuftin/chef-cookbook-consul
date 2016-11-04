@@ -4,7 +4,9 @@ driver:
 
 provisioner:
   name: chef_zero
-
+  client_rb: 
+    chef_gem_compile_time: false
+  
 platforms:
   - name: centos-6.7-vbox
     driver:
@@ -18,28 +20,95 @@ platforms:
       provider: vmware_fusion
 
 suites:
-  - name: default-server
+  - name: default-agent
     driver:
       network:
-      - ["private_network", {ip: "10.0.0.10"}]
+      - ['private_network', {ip: '192.168.33.30'}]
+      - ["forwarded_port", {guest: 8500, host: 8500}]
     run_list:
-      - recipe[owi-consul::server]
+      - recipe[doi_ssl_filtering]
+      - recipe[doi_ssl_filtering::kitchen]
+      - recipe[owi-consul]
+      - recipe[consul]  
+      - recipe[owi-consul::iptables]
     data_path: './test/fixtures/files/'
     attributes: {
+      'owi-consul' : {
+        'iptables' : {
+          'http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
+          'dns_8600' : '-A FWR -p tcp -m tcp --dport 8600 -j ACCEPT',
+          'rpc_8400' : '-A FWR -p tcp -m tcp --dport 8400 -j ACCEPT',
+          'rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
+          'rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
+          'rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT'
+        }
+      },
       'consul' : {
         'config' : {
-          'acl_datacenter' : 'kitchen_server',
-          'datacenter' : 'kitchen_center',
-          'server' : true,
-          'server_name' : 'test_server',
+          'advertise_addr' : '192.168.33.30',
+          'advertise_addr_wan' : '192.168.33.30',
           'enable_syslog' : true,
+          'node_name' : 'kitchen_node',
           'ui' : true,
           'verify_incoming' : true,
           'verify_outgoing' : true,
           'ca_file' : '/tmp/kitchen/data/rootCA.pem',
           'cert_file' : '/tmp/kitchen/data/rootCA.crt',
-          'key_file' : '/tmp/kitchen/data/rootCA.key'
+          'key_file' : '/tmp/kitchen/data/rootCA.key',
+          'start_join' : [
+            '192.168.33.33'
+          ]
         }
+      }
+    }
+  - name: default-server
+    driver:
+      network:
+      - ['private_network', {ip: '192.168.33.33'}]
+      - ["forwarded_port", {guest: 8500, host: 8501}]
+    run_list:
+      - recipe[doi_ssl_filtering]
+      - recipe[doi_ssl_filtering::kitchen]
+      - recipe[owi-consul]
+      - recipe[consul]
+      - recipe[owi-consul::iptables]
+      - recipe[owi-consul::bind]
+      - recipe[resolver]
+    data_path: './test/fixtures/files/'
+    attributes: {
+      'owi-consul' : {
+        'iptables' : {
+          'rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
+          'rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
+          'rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT',
+          'rpc_8400' : '-A FWR -p tcp -m tcp --dport 8400 -j ACCEPT', # RPC Port. Optional
+          'http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
+          'http_8501' : '-A FWR -p tcp -m tcp --dport 8501 -j ACCEPT',
+          'dns_8600' : '-A FWR -p tcp -m tcp --dport 8600 -j ACCEPT' # DNS Server. Optional.
+        }
+      },
+      'consul' : {
+        'config' : {
+          'acl_datacenter' : 'dc1',
+          'advertise_addr' : '192.168.33.33',
+          'advertise_addr_wan' : '192.168.33.33',
+          'bootstrap_expect' : 1,
+          'server' : true,
+          'server_name' : 'kitchen_server',
+          'enable_syslog' : true,
+          'node_name' : 'kitchen_server',
+          'ui' : true,
+          'verify_incoming' : true,
+          'verify_outgoing' : true,
+          'ca_file' : '/tmp/kitchen/data/rootCA.pem',
+          'cert_file' : '/tmp/kitchen/data/rootCA.crt',
+          'key_file' : '/tmp/kitchen/data/rootCA.key',
+          'recursors' : [ '8.8.8.8' ]
+        }
+      },
+      'resolver' : {
+        'search' : 'consul gs.doi.net',
+        'nameservers' : [ '127.0.0.1' ]
       }
     }
     
