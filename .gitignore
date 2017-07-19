@@ -18,4 +18,6 @@ bin/*
 
 .kitchen/
 .kitchen.local.yml
+test/fixtures/files/ssl_intercept.crt
 
+.DS_Store

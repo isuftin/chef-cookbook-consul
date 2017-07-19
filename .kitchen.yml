@@ -4,111 +4,153 @@ driver:
 
 provisioner:
   name: chef_zero
-  client_rb: 
-    chef_gem_compile_time: false
-  
+
 platforms:
-  - name: centos-6.7-vbox
+  - name: centos-6.8
     driver:
-      box: bento/centos-6.7
-      box_url: bento/centos-6.7
+      box: bento/centos-6.8
+      box_url: bento/centos-6.8
       provider: virtualbox
-  - name: centos-6.7-vmware
+  - name: centos-7.3
     driver:
-      box: bento/centos-6.7
-      box_url: bento/centos-6.7
-      provider: vmware_fusion
+      box: bento/centos-7.3
+      box_url: bento/centos-7.3
+      provider: virtualbox
 
 suites:
-  - name: default-agent
+  - name: default-agent-1
     driver:
       network:
-      - ['private_network', {ip: '192.168.33.30'}]
-      - ["forwarded_port", {guest: 8500, host: 8500}]
+      - ["forwarded_port", {guest: 8500, host: 8510, auto_correct: true}]
+      - ["forwarded_port", {guest: 8501, host: 8511, auto_correct: true}]
     run_list:
-      - recipe[doi_ssl_filtering]
-      - recipe[doi_ssl_filtering::kitchen]
       - recipe[owi-consul]
-      - recipe[consul]  
       - recipe[owi-consul::iptables]
     data_path: './test/fixtures/files/'
+    data_bags_path: './test/integration/default/data_bags/'
+    encrypted_data_bag_secret_key_path: './test/integration/default/encrypted_data_bag_secret'
     attributes: {
       'owi-consul' : {
+       'data_bag' : {
+          'name' : 'owi-consul-_default',
+          'acl' : {
+            'name' : 'acl_server'
+          },
+          'secrets' : {
+            'name' : 'secrets'
+          }
+        },
         'iptables' : {
-          'http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
-          'dns_8600' : '-A FWR -p tcp -m tcp --dport 8600 -j ACCEPT',
-          'rpc_8400' : '-A FWR -p tcp -m tcp --dport 8400 -j ACCEPT',
-          'rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
-          'rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
-          'rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT'
+          'tcp_http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
+          'tcp_https_8501' : '-A FWR -p tcp -m tcp --dport 8501 -j ACCEPT',
+          'tcp_rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
+          'tcp_rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
+          'udp_rpc_8301' : '-A FWR -p udp -m udp --dport 8301 -j ACCEPT',
+          'tcp_rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT',
+          'udp_rpc_8302' : '-A FWR -p udp -m udp --dport 8302 -j ACCEPT'
         }
       },
       'consul' : {
         'config' : {
-          'advertise_addr' : '192.168.33.30',
-          'advertise_addr_wan' : '192.168.33.30',
+          'addresses' : {
+            'http' : '0.0.0.0',
+            'https' : '0.0.0.0'
+          },
+          'acl_datacenter' : 'kitchen',
+          'bind_addr' : '0.0.0.0',
+          'bootstrap_expect' : 1,
+          'check_update_interval' : '5m',
+          'datacenter' : 'kitchen',
+          'disable_remote_exec' : true,
+          'disable_update_check' : true,
+          'http_api_response_headers' : {
+            'Access-Control-Allow-Origin' : '*'
+          },
+          'retry_join' : [],
+          'server' : false,
+          'server_name' : 'kitchen_server',
           'enable_syslog' : true,
-          'node_name' : 'kitchen_node',
+          'leave_on_terminate' : true,
+          'node_name' : 'kitchen_client_1',
+          'ports' : {
+            'http' : 8500,
+            'https' : 8501
+          },
           'ui' : true,
           'verify_incoming' : true,
           'verify_outgoing' : true,
-          'ca_file' : '/tmp/kitchen/data/rootCA.pem',
-          'cert_file' : '/tmp/kitchen/data/rootCA.crt',
-          'key_file' : '/tmp/kitchen/data/rootCA.key',
-          'start_join' : [
-            '192.168.33.33'
-          ]
+          'verify_server_hostname' : true,
+          'ca_file' : '/tmp/kitchen/data/consul-root.cer',
+          'cert_file' : '/tmp/kitchen/data/consul-server.cer',
+          'key_file' : '/tmp/kitchen/data/consul-server.key'
         }
       }
     }
+
   - name: default-server
     driver:
       network:
-      - ['private_network', {ip: '192.168.33.33'}]
-      - ["forwarded_port", {guest: 8500, host: 8501}]
+      - ["forwarded_port", {guest: 8500, host: 8500, auto_correct: true}]
+      - ["forwarded_port", {guest: 8501, host: 8501, auto_correct: true}]
     run_list:
-      - recipe[doi_ssl_filtering]
-      - recipe[doi_ssl_filtering::kitchen]
       - recipe[owi-consul]
-      - recipe[consul]
       - recipe[owi-consul::iptables]
-      - recipe[owi-consul::bind]
-      - recipe[resolver]
     data_path: './test/fixtures/files/'
+    data_bags_path: './test/integration/default/data_bags/'
+    encrypted_data_bag_secret_key_path: './test/integration/default/encrypted_data_bag_secret'
     attributes: {
       'owi-consul' : {
+       'data_bag' : {
+          'name' : 'owi-consul-_default',
+          'acl' : {
+            'name' : 'acl_server'
+          },
+          'secrets' : {
+            'name' : 'secrets'
+          }
+        },
         'iptables' : {
-          'rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
-          'rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
-          'rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT',
-          'rpc_8400' : '-A FWR -p tcp -m tcp --dport 8400 -j ACCEPT', # RPC Port. Optional
-          'http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
-          'http_8501' : '-A FWR -p tcp -m tcp --dport 8501 -j ACCEPT',
-          'dns_8600' : '-A FWR -p tcp -m tcp --dport 8600 -j ACCEPT' # DNS Server. Optional.
+          'tcp_http_8500' : '-A FWR -p tcp -m tcp --dport 8500 -j ACCEPT',
+          'tcp_https_8501' : '-A FWR -p tcp -m tcp --dport 8501 -j ACCEPT',
+          'tcp_rpc_8300' : '-A FWR -p tcp -m tcp --dport 8300 -j ACCEPT',
+          'tcp_rpc_8301' : '-A FWR -p tcp -m tcp --dport 8301 -j ACCEPT',
+          'udp_rpc_8301' : '-A FWR -p udp -m udp --dport 8301 -j ACCEPT',
+          'tcp_rpc_8302' : '-A FWR -p tcp -m tcp --dport 8302 -j ACCEPT',
+          'udp_rpc_8302' : '-A FWR -p udp -m udp --dport 8302 -j ACCEPT'
         }
       },
       'consul' : {
         'config' : {
-          'acl_datacenter' : 'dc1',
-          'advertise_addr' : '192.168.33.33',
-          'advertise_addr_wan' : '192.168.33.33',
+          'addresses' : {
+            'http' : '0.0.0.0',
+            'https' : '0.0.0.0'
+          },
+          'acl_datacenter' : 'kitchen',
+          'bind_addr' : '0.0.0.0',
           'bootstrap_expect' : 1,
+          'check_update_interval' : '5m',
+          'datacenter' : 'kitchen',
+          'disable_remote_exec' : true,
+          'disable_update_check' : true,
+          'http_api_response_headers' : {
+            'Access-Control-Allow-Origin' : '*'
+          },
           'server' : true,
           'server_name' : 'kitchen_server',
           'enable_syslog' : true,
+          'leave_on_terminate' : true,
           'node_name' : 'kitchen_server',
+          'ports' : {
+            'http' : 8500,
+            'https' : 8501
+          },
           'ui' : true,
           'verify_incoming' : true,
           'verify_outgoing' : true,
-          'ca_file' : '/tmp/kitchen/data/rootCA.pem',
-          'cert_file' : '/tmp/kitchen/data/rootCA.crt',
-          'key_file' : '/tmp/kitchen/data/rootCA.key',
-          'recursors' : [ '8.8.8.8' ]
+          'verify_server_hostname' : true,
+          'ca_file' : '/tmp/kitchen/data/consul-root.cer',
+          'cert_file' : '/tmp/kitchen/data/consul-server.cer',
+          'key_file' : '/tmp/kitchen/data/consul-server.key'
         }
-      },
-      'resolver' : {
-        'search' : 'consul gs.doi.net',
-        'nameservers' : [ '127.0.0.1' ]
       }
     }
-    

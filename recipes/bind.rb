@@ -9,20 +9,19 @@
 
 package 'bind'
 package 'bind-utils'
-package 'bind-utils'
 
-cookbook_file "/etc/named.conf" do
+cookbook_file '/etc/named.conf' do
   owner 'named'
   group 'named'
-  mode 00644
+  mode 0o644
   notifies :enable, 'service[rpcbind]', :immediately
   notifies :restart, 'service[rpcbind]', :immediately
 end
 
-cookbook_file "/etc/named/consul.conf" do
+cookbook_file '/etc/named/consul.conf' do
   owner 'named'
   group 'named'
-  mode 00644
+  mode 0o644
   notifies :enable, 'service[rpcbind]', :immediately
   notifies :restart, 'service[rpcbind]', :immediately
 end
@@ -32,4 +31,11 @@ service 'rpcbind' do
   action :nothing
   subscribes :reload, resources('cookbook_file[/etc/named.conf]'), :delayed
   subscribes :reload, resources('cookbook_file[/etc/named/consul.conf]'), :delayed
+end
+
+service 'named' do
+  supports reload: true, status: true
+  action :nothing
+  subscribes :restart, resources('cookbook_file[/etc/named.conf]'), :delayed
+  subscribes :restart, resources('cookbook_file[/etc/named/consul.conf]'), :delayed
 end

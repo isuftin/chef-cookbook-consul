@@ -1,0 +1,10 @@
+{
+  "id": "consul",
+  "consul": {
+    "encrypted_data": "a6BDO1/UZKTP52WrVEUH5X4bWuDImecc5XSXmXn280q+6pduplLKCR3JwTwB\n6W3H46GtiRQVopI4BW0+DyqwmQ==\n",
+    "hmac": "aLFbOUQPikGcT2oDq9z7V08FuGROiRFcdFOof57O5OA=\n",
+    "iv": "Ht2nyutlj0Z55pTIi8foBw==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  }
+}

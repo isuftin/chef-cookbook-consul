@@ -1,0 +1,50 @@
+{
+    "id": "acl_server",
+    "acl_items": [{
+            "id": "cc082fbd-ceba-4036-9dad-ca2aaa71c2bc",
+            "url": "http://localhost:8500",
+            "acl_name": "",
+            "type": "server",
+            "rules": [{
+                "key": {
+                    "": {
+                        "policy": "read"
+                    },
+                    "foo/": {
+                        "policy": "write"
+                    },
+                    "foo/private": {
+                        "policy": "deny"
+                    },
+                    "_rexec/": {
+                        "policy": "write"
+                    }
+                },
+                "service": {
+                    "": {
+                        "policy": "write"
+                    },
+                    "secure-": {
+                        "policy": "read"
+                    }
+                },
+                "event": {
+                    "": {
+                        "policy": "write"
+                    },
+                    "destroy-": {
+                        "policy": "deny"
+                    }
+                },
+                "query": {
+                    "": {
+                        "policy": "read"
+                    }
+                },
+                "keyring": "read",
+                "operator": "read"
+            }]
+        }
+
+    ]
+}

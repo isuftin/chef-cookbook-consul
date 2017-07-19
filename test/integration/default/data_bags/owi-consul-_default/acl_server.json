@@ -1,0 +1,10 @@
+{
+  "id": "acl_server",
+  "acl_items": {
+    "encrypted_data": "W4KL3x6FoVVHy3ufLXHzaB3FYULbr79JOs6TXsKmpbu1csAMUGJFcnBCkUUw\np4BHswtaVwrDVaFJ4+zvy+2CGOUdl/2pFJ3mAPNfKgpVd1x5kgxu2MkUvFE8\nxYLJxBXhuMgqeEbLdkoj4SjJA85ohf/b8Ui99+y8xJ9CMLCGhhswQWBgzOJb\nSzdN0jAFN2jxXaQaC4uGk+WYzm8MAO/in5pSVeQYRURMRP3Ac8uOg8C7FHsO\n/mEenETTXzA5LUOdDT8SXlQuUP7v/FcYEPOyu/unjxybrGS/aKcp3gbZ7sTf\n/9HJpghYFZeXtNumUJOviN/d2TWnBocI4oajyh/W4vDIHdNuCRNOTATnejYU\nw0fNV4nf0uOp4/mNjLOS62bc8YN6sGXMQ0V/lySEzuMYXnatJq8MTNUTw1F/\nom2rNi94Ije+3impFQf0sNp0HPIKSasY/+keQWDygM2rqvXkVtoTF0YTvYsE\nyYQ2q4M49sWF4WTGflVq4jolIAMl3w9gWfMQeLr9ClZLtyjppAKtqEVP1x0Z\ndUUUBNE5gZttgS7P5kBypQ/rpj1hyApYo2w8DZR7Jnh/IIIIAAjbjiBB0w==\n",
+    "hmac": "WvTrpx0fCFWw/LDfcijDghSEMefqYpjJqMi74T1szhE=\n",
+    "iv": "tg4EPVXvgmuWIGtSZVSYxQ==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  }
+}
